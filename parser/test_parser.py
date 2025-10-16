@@ -8,8 +8,11 @@ from fat32_parser import FAT32Parser
 from directory_entry import DirectoryParser
 
 def main():
-    image_path = "../images/FAT_32_32MB"
-    
+    image_path_linux = "../images/FAT_32_32MB"
+    image_path_windows = "S:\second year\python-defrag\images\FAT_32_32MB"
+    image_path = image_path_windows if os.name == 'nt' else image_path_linux
+
+
     try:
         with FAT32Parser(image_path) as fat_parser:
             boot_sector = fat_parser.parse_boot_sector()
