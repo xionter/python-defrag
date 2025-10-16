@@ -13,6 +13,8 @@ class BootSector:
     sectors_per_fat: int
     root_dir_cluster: int
     signature: int
+    fat_size: int
+    data_start_sector: int
 
 class FAT32Parser:
     def __init__(self, image_path: str):
@@ -45,6 +47,9 @@ class FAT32Parser:
         self.file_handle.seek(0)
         boot_data = self.file_handle.read(512)
         
+        if len(boot_data) < 512:
+            raise ValueError("Boot sector too small")
+            
         if boot_data[510] != 0x55 or boot_data[511] != 0xAA:
             raise ValueError("Invalid boot sector signature")
             
@@ -57,6 +62,9 @@ class FAT32Parser:
         root_dir_cluster = struct.unpack('<I', boot_data[44:48])[0]
         signature = struct.unpack('<H', boot_data[510:512])[0]
         
+        fat_size = sectors_per_fat * bytes_per_sector
+        data_start_sector = reserved_sectors + (num_fats * sectors_per_fat)
+        
         self.boot_sector = BootSector(
             bytes_per_sector=bytes_per_sector,
             sectors_per_cluster=sectors_per_cluster,
@@ -65,7 +73,9 @@ class FAT32Parser:
             total_sectors=total_sectors,
             sectors_per_fat=sectors_per_fat,
             root_dir_cluster=root_dir_cluster,
-            signature=signature
+            signature=signature,
+            fat_size=fat_size,
+            data_start_sector=data_start_sector
         )
         
         return self.boot_sector
@@ -73,14 +83,13 @@ class FAT32Parser:
     def get_fat_offset(self, fat_number: int = 0) -> int:
         if not self.boot_sector:
             raise RuntimeError("Boot sector not parsed")
-        return self.boot_sector.reserved_sectors * self.boot_sector.bytes_per_sector
+        return (self.boot_sector.reserved_sectors + 
+                fat_number * self.boot_sector.sectors_per_fat) * self.boot_sector.bytes_per_sector
     
     def get_data_offset(self) -> int:
         if not self.boot_sector:
             raise RuntimeError("Boot sector not parsed")
-        
-        fat_size = self.boot_sector.num_fats * self.boot_sector.sectors_per_fat
-        return (self.boot_sector.reserved_sectors + fat_size) * self.boot_sector.bytes_per_sector
+        return self.boot_sector.data_start_sector * self.boot_sector.bytes_per_sector
     
     def cluster_to_offset(self, cluster: int) -> int:
         if cluster < 2:
@@ -109,24 +118,18 @@ class FAT32Parser:
         fat_entry = struct.unpack('<I', self.file_handle.read(4))[0]
         
         return fat_entry & 0x0FFFFFFF
-
-def main():
-    image_path = "../images/FAT_32_32MB"
     
-    try:
-        with FAT32Parser(image_path) as parser:
-            boot_sector = parser.parse_boot_sector()
-            print("Boot Sector Information:")
-            print(f"  Bytes per sector: {boot_sector.bytes_per_sector}")
-            print(f"  Sectors per cluster: {boot_sector.sectors_per_cluster}")
-            print(f"  Reserved sectors: {boot_sector.reserved_sectors}")
-            print(f"  Number of FATs: {boot_sector.num_fats}")
-            print(f"  Sectors per FAT: {boot_sector.sectors_per_fat}")
-            print(f"  Root directory cluster: {boot_sector.root_dir_cluster}")
-            print(f"  Signature: 0x{boot_sector.signature:04X}")
+    def get_cluster_chain(self, start_cluster: int) -> List[int]:
+        chain = [start_cluster]
+        current_cluster = start_cluster
+        
+        while True:
+            next_cluster = self.read_fat_entry(current_cluster)
+            if next_cluster >= 0x0FFFFFF8:
+                break
+            if next_cluster == 0 or next_cluster == 1:
+                break
+            chain.append(next_cluster)
+            current_cluster = next_cluster
             
-    except Exception as e:
-        print(f"Error: {e}")
-
-if __name__ == "__main__":
-    main()
+        return chain
