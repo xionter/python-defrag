@@ -14,12 +14,15 @@ from defrag_engine import DefragmentationEngine
 def main():
     parser = argparse.ArgumentParser(description='FAT32 Defragmentation Engine')
     parser.add_argument('image', help='Path to FAT32 image file')
+    parser.add_argument('--output', '-o', help='Output path for defragmented image')
     parser.add_argument('--dry-run', action='store_true', 
                        help='Plan but do not execute defragmentation (default)')
     parser.add_argument('--execute', action='store_true',
-                       help='Actually execute defragmentation (DANGEROUS - not implemented yet)')
+                       help='Actually execute defragmentation and create output image')
     parser.add_argument('--analyze-only', action='store_true',
                        help='Only analyze fragmentation without planning moves')
+    parser.add_argument('--no-verify', action='store_true',
+                       help='Skip verification after defragmentation')
     
     args = parser.parse_args()
     
@@ -41,7 +44,11 @@ def main():
             else:
                 # Run defragmentation (dry run by default)
                 dry_run = not args.execute
-                result = engine.defragment(dry_run=dry_run)
+                result = engine.defragment(
+                    output_path=args.output,
+                    dry_run=dry_run,
+                    verify=not args.no_verify
+                )
                 
                 # Print results
                 print("\n" + "=" * 60)
@@ -55,10 +62,18 @@ def main():
                     print(f"  - Total clusters to move: {sim['total_clusters_moved']}")
                     print(f"  - Fragmentation reduction: {sim['fragmentation_reduction']} fragments")
                     print(f"  - Total moves planned: {sim['total_moves']}")
+                    print(f"  - Estimated time: {sim['estimated_time_seconds']:.1f} seconds")
                 else:
-                    print("Defragmentation executed")
-                    if 'warning' in result:
-                        print(f"WARNING: {result['warning']}")
+                    exec_result = result['execution_result']
+                    print(f"Defragmentation executed:")
+                    print(f"  - Output image: {exec_result['output_image']}")
+                    print(f"  - Successful moves: {exec_result['successful_moves']}/{exec_result['total_moves']}")
+                    print(f"  - Success rate: {exec_result['success_rate']:.1f}%")
+                    
+                    if 'verification' in result:
+                        imp = result['verification']['improvement']
+                        print(f"  - Fragmented files: {imp['files_fragmented_before']} → {imp['files_fragmented_after']}")
+                        print(f"  - Fragmentation reduction: {imp['fragmentation_reduction']} files")
                 
     except Exception as e:
         print(f"Error: {e}")
