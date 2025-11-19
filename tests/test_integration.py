@@ -23,13 +23,11 @@ class TestIntegration(unittest.TestCase):
             analyzer = FAT32Analyzer(parser)
             report = analyzer.analyze()
             
-            # Verify report structure
             self.assertIn('stats', report)
             self.assertIn('files', report)
             self.assertIn('dirs', report)
             self.assertIn('free_extents', report)
             
-            # Verify basic statistics make sense
             stats = report['stats']
             self.assertGreaterEqual(stats['files_total'], 0)
             self.assertGreaterEqual(stats['cluster_size_bytes'], 512)
@@ -41,10 +39,8 @@ class TestIntegration(unittest.TestCase):
             analyzer = FAT32Analyzer(parser)
             records = analyzer.walk()
             
-            # Should at least have root directory
             self.assertGreater(len(records), 0)
             
-            # Root directory should be included
             root_dirs = [r for r in records if r.path == "/" and r.is_directory]
             self.assertEqual(len(root_dirs), 1)
 

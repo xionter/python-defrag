@@ -37,7 +37,6 @@ class FAT32Parser:
         self.boot_sector: Optional[BootSector] = None
         self.writable = writable
 
-    # -- context manager plumbing -------------------------------------------------
     def open(self) -> None:
         if not os.path.exists(self.image_path):
             raise FileNotFoundError(f"Image file not found: {self.image_path}")
@@ -57,7 +56,6 @@ class FAT32Parser:
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.close()
 
-    # -- helpers ------------------------------------------------------------------
     def _require_open(self) -> BinaryIO:
         if not self._file:
             raise RuntimeError("File not open. Call open() first.")
@@ -79,7 +77,6 @@ class FAT32Parser:
             self._file.flush()
             os.fsync(self._file.fileno())
 
-    # -- boot sector --------------------------------------------------------------
     def parse_boot_sector(self) -> BootSector:
         """Read the first 512 bytes and populate BootSector data."""
         fh = self._require_open()
@@ -117,7 +114,6 @@ class FAT32Parser:
         )
         return self.boot_sector
 
-    # -- offsets and addressing ---------------------------------------------------
     def get_fat_offset(self, fat_number: int = 0) -> int:
         sector = self._require_boot_sector()
         return (
@@ -134,7 +130,6 @@ class FAT32Parser:
         sector = self._require_boot_sector()
         return self.get_data_offset() + (cluster - 2) * sector.cluster_size
 
-    # -- cluster IO ---------------------------------------------------------------
     def read_cluster(self, cluster: int) -> bytes:
         fh = self._require_open()
         sector = self._require_boot_sector()
@@ -155,7 +150,6 @@ class FAT32Parser:
         fh.seek(self.cluster_to_offset(cluster))
         fh.write(data)
 
-    # -- FAT manipulation ---------------------------------------------------------
     def read_fat_entry(self, cluster: int) -> int:
         fh = self._require_open()
         fat_offset = self.get_fat_offset()

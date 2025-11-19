@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import shutil
 import struct
 from datetime import datetime
-from typing import Dict, List, MutableMapping, Sequence
-import logging
+from typing import Dict, List, MutableMapping, Sequence, cast
 
 from ..analysis.analyser import FAT32Analyzer
 from ..parser.fat32_parser import FAT32Parser
@@ -24,7 +24,6 @@ class DefragmentationEngine:
         self.analyzer = FAT32Analyzer(parser)
         self.modified_clusters: set[int] = set()
 
-    # ---------------------------------------------------------------- planning --
     def plan_defragmentation(self, report: Dict) -> List[MovePlan]:
         """Return a list describing how fragmented files should be relocated."""
         files = [f for f in report["files"] if f["fragments"] > 1]
@@ -66,7 +65,6 @@ class DefragmentationEngine:
                 return extent
         return None
 
-    # ---------------------------------------------------------- data movement --
     def create_output_image(self, output_path: str | None) -> str:
         """Create a working copy of the disk image to modify."""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -82,7 +80,7 @@ class DefragmentationEngine:
     def move_file_clusters(self, output_parser: FAT32Parser, move: MovePlan) -> bool:
         """Physically move cluster data described by ``move``."""
         try:
-            source_clusters: Sequence[int] = move["source_clusters"]  # type: ignore[index]
+            source_clusters = cast(Sequence[int], move["source_clusters"])
             target_start = int(move["target_start"])
             file_size = int(move["size_bytes"])
             data = self._read_cluster_bytes(source_clusters, file_size)
@@ -229,7 +227,6 @@ class DefragmentationEngine:
         updated[26:28] = struct.pack("<H", new_low)
         return bytes(updated)
 
-    # --------------------------------------------------------------- execution --
     def execute_defragmentation(self, moves: List[MovePlan], output_path: str | None = None) -> Dict:
         """Execute planned moves and report success/failure statistics."""
         output_image_path = self.create_output_image(output_path)
@@ -272,7 +269,6 @@ class DefragmentationEngine:
             if cluster not in self.modified_clusters:
                 output_parser.write_fat_entry(cluster, 0)
 
-    # ---------------------------------------------------------------- workflow --
     def defragment(self, output_path: str | None = None) -> Dict:
         """Analyze the current image, plan moves, and optionally execute them."""
         report = self.analyzer.analyze()

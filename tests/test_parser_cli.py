@@ -33,7 +33,7 @@ def main() -> None:
                     f"Cluster: {entry.first_cluster:6d} Size: {size_str}"
                 )
 
-    except Exception as exc:  # pragma: no cover - helper script
+    except Exception as exc:
         print(f"Error: {exc}")
 
 

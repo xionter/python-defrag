@@ -51,7 +51,6 @@ class FAT32Analyzer:
         self._cluster_chain_cache: Dict[int, List[int]] = {}
         self._dir_bytes_cache: Dict[int, bytes] = {}
 
-    # ------------------------------------------------------------------ helpers --
     def cluster_size(self) -> int:
         boot = self.parser.boot_sector
         return boot.cluster_size
@@ -84,7 +83,6 @@ class FAT32Analyzer:
         raw = self._chain_bytes(cluster)
         return self.dir_parser.parse_directory_entries(raw)
 
-    # ---------------------------------------------------------------- directory --
     def walk(self) -> List[FileRecord]:
         """Traverse the directory tree and return collected file records."""
         root_cluster = self.parser.boot_sector.root_dir_cluster
@@ -129,7 +127,6 @@ class FAT32Analyzer:
             is_directory=True,
         )
 
-    # ----------------------------------------------------------- bitmap helpers --
     def build_allocation_bitmap(self, records: Iterable[FileRecord]) -> List[int]:
         bitmap = [0] * self.total_clusters()
         for rec in records:
@@ -154,7 +151,6 @@ class FAT32Analyzer:
                 idx += 1
         return extents
 
-    # -------------------------------------------------------------- stats/report --
     def stats(self, records: List[FileRecord], free_runs: List[Extent]) -> Dict:
         files = [r for r in records if not r.is_directory]
         fragmented_files = [r for r in files if r.fragments > 1]

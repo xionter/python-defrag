@@ -39,7 +39,6 @@ class TestDefragEngine(unittest.TestCase):
             report = engine.analyzer.analyze()
             moves = engine.plan_defragmentation(report)
 
-            # Should return a list (may be empty if no fragmentation)
             self.assertIsInstance(moves, list)
             if not moves:
                 return

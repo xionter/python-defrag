@@ -77,7 +77,7 @@ def main() -> int:
             )
             print(f"Success rate: {exec_result['success_rate']:.1f}%")
 
-    except Exception as exc:  # pragma: no cover - CLI level diagnostics
+    except Exception as exc:
         print(f"Error: {exc}")
         import traceback
 
