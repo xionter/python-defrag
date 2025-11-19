@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-"""Command-line interface for running the defragmentation engine."""
-
 from __future__ import annotations
 
 import argparse
@@ -14,7 +11,6 @@ from .defrag_engine import DefragmentationEngine
 
 
 def _print_plan(moves: List[dict]) -> None:
-    """Render a compact table of planned moves."""
     print("\nPlanned moves:")
     for move in moves:
         print(

@@ -1,5 +1,3 @@
-"""Helper CLI for quickly inspecting fragmentation through the analyzer."""
-
 import argparse
 from pathlib import Path
 

@@ -15,7 +15,6 @@ class TestIntegration(unittest.TestCase):
             self.skipTest("Test image not found")
     
     def test_parser_to_analyzer_flow(self):
-        """Test that parser and analyzer work together"""
         with FAT32Parser(str(self.image_path)) as parser:
             boot_sector = parser.parse_boot_sector()
             self.assertIsNotNone(boot_sector)
@@ -33,7 +32,6 @@ class TestIntegration(unittest.TestCase):
             self.assertGreaterEqual(stats['cluster_size_bytes'], 512)
     
     def test_directory_traversal(self):
-        """Test that we can traverse directories"""
         with FAT32Parser(str(self.image_path)) as parser:
             parser.parse_boot_sector()
             analyzer = FAT32Analyzer(parser)

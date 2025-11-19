@@ -1,5 +1,3 @@
-"""Utilities for parsing FAT32 directory entries."""
-
 from __future__ import annotations
 
 import struct
@@ -10,7 +8,7 @@ from typing import Iterable, List, Optional
 
 @dataclass(slots=True)
 class DirectoryEntry:
-    """Represents a single on-disk FAT32 directory entry."""
+
 
     name: str
     extension: str
@@ -26,12 +24,11 @@ class DirectoryEntry:
 
     @property
     def full_name(self) -> str:
-        """Return the canonical name, including the extension when present."""
+
         return f"{self.name}.{self.extension}" if self.extension else self.name
 
 
 class DirectoryParser:
-    """Parses FAT32 directory data into high-level DirectoryEntry objects."""
 
     ENTRY_SIZE = 32
 
@@ -44,7 +41,7 @@ class DirectoryParser:
         date: int,
         tenths: int = 0,
     ) -> Optional[datetime]:
-        """Convert FAT date/time fields into a datetime."""
+
         try:
             second = (time & 0x1F) * 2
             minute = (time >> 5) & 0x3F
@@ -66,7 +63,7 @@ class DirectoryParser:
 
     @staticmethod
     def _decode_ascii(field: bytes) -> str:
-        """Decode an ASCII field and strip trailing whitespace."""
+
         return field.decode("ascii", errors="replace").rstrip()
 
     def _iter_raw_entries(self, directory_data: bytes) -> Iterable[bytes]:
@@ -79,7 +76,7 @@ class DirectoryParser:
             yield chunk
 
     def parse_directory_entries(self, cluster_data: bytes) -> List[DirectoryEntry]:
-        """Parse 32-byte directory entries stored within raw cluster data."""
+
         entries: List[DirectoryEntry] = []
         for raw_entry in self._iter_raw_entries(cluster_data):
             entry = self._build_entry(raw_entry)
@@ -125,7 +122,6 @@ class DirectoryParser:
             return None
 
     def parse_root_directory(self) -> List[DirectoryEntry]:
-        """Parse the root directory cluster referenced by the boot sector."""
         if not self.fat_parser.boot_sector:
             self.fat_parser.parse_boot_sector()
 

@@ -1,5 +1,3 @@
-"""Low-level helpers for working with FAT32 filesystem images."""
-
 from __future__ import annotations
 
 import os
@@ -10,7 +8,6 @@ from typing import BinaryIO, List, Optional
 
 @dataclass(slots=True)
 class BootSector:
-    """Subset of FAT32 boot sector fields that we care about."""
 
     bytes_per_sector: int
     sectors_per_cluster: int
@@ -29,7 +26,7 @@ class BootSector:
 
 
 class FAT32Parser:
-    """Thin wrapper around disk-image reads/writes with convenience helpers."""
+
 
     def __init__(self, image_path: str, writable: bool = False):
         self.image_path = image_path
@@ -63,7 +60,7 @@ class FAT32Parser:
 
     @property
     def file_handle(self) -> BinaryIO:
-        """Expose the underlying file handle for the few direct-manipulation cases."""
+
         return self._require_open()
 
     def _require_boot_sector(self) -> BootSector:
@@ -72,13 +69,11 @@ class FAT32Parser:
         return self.boot_sector
 
     def sync(self) -> None:
-        """Flush pending writes to disk."""
         if self._file:
             self._file.flush()
             os.fsync(self._file.fileno())
 
     def parse_boot_sector(self) -> BootSector:
-        """Read the first 512 bytes and populate BootSector data."""
         fh = self._require_open()
         fh.seek(0)
         boot_data = fh.read(512)

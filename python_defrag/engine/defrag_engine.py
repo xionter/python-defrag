@@ -1,4 +1,3 @@
-"""Core logic responsible for planning and executing defragmentation."""
 
 from __future__ import annotations
 
@@ -17,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class DefragmentationEngine:
-    """Coordinates the high-level workflow for optimizing a FAT32 image."""
+
 
     def __init__(self, parser: FAT32Parser):
         self.parser = parser
@@ -25,7 +24,7 @@ class DefragmentationEngine:
         self.modified_clusters: set[int] = set()
 
     def plan_defragmentation(self, report: Dict) -> List[MovePlan]:
-        """Return a list describing how fragmented files should be relocated."""
+
         files = [f for f in report["files"] if f["fragments"] > 1]
         free_extents = [extent.copy() for extent in report["free_extents"]]
         if not files or not free_extents:
@@ -66,7 +65,7 @@ class DefragmentationEngine:
         return None
 
     def create_output_image(self, output_path: str | None) -> str:
-        """Create a working copy of the disk image to modify."""
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         if not output_path:
             original_name = os.path.basename(self.parser.image_path)
@@ -78,7 +77,7 @@ class DefragmentationEngine:
         return output_path
 
     def move_file_clusters(self, output_parser: FAT32Parser, move: MovePlan) -> bool:
-        """Physically move cluster data described by ``move``."""
+
         try:
             source_clusters = cast(Sequence[int], move["source_clusters"])
             target_start = int(move["target_start"])
@@ -139,7 +138,7 @@ class DefragmentationEngine:
         old_first_cluster: int,
         new_first_cluster: int,
     ) -> None:
-        """Rewrite the directory entry for the moved file."""
+
 
         def _decode_name(entry_data: bytes) -> str:
             name = entry_data[0:8].decode("ascii", errors="replace").rstrip()
@@ -228,7 +227,7 @@ class DefragmentationEngine:
         return bytes(updated)
 
     def execute_defragmentation(self, moves: List[MovePlan], output_path: str | None = None) -> Dict:
-        """Execute planned moves and report success/failure statistics."""
+
         output_image_path = self.create_output_image(output_path)
         success = 0
         failed: List[str] = []
@@ -270,7 +269,7 @@ class DefragmentationEngine:
                 output_parser.write_fat_entry(cluster, 0)
 
     def defragment(self, output_path: str | None = None) -> Dict:
-        """Analyze the current image, plan moves, and optionally execute them."""
+
         report = self.analyzer.analyze()
         moves = self.plan_defragmentation(report)
         if not moves:

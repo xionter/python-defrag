@@ -1,4 +1,4 @@
-"""High-level FAT32 volume inspection and reporting utilities."""
+
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ Extent = Tuple[int, int]
 
 @dataclass(slots=True)
 class FileRecord:
-    """Represents either a file or directory discovered while walking the volume."""
+
 
     path: str
     size_bytes: int
@@ -25,7 +25,7 @@ class FileRecord:
 
 
 def _to_extents(chain: List[int]) -> List[Extent]:
-    """Convert a cluster chain into (start, length) extents."""
+
     if not chain:
         return []
 
@@ -43,7 +43,7 @@ def _to_extents(chain: List[int]) -> List[Extent]:
 
 
 class FAT32Analyzer:
-    """Gathers fragmentation statistics and directory metadata."""
+
 
     def __init__(self, parser: FAT32Parser):
         self.parser = parser
@@ -84,7 +84,7 @@ class FAT32Analyzer:
         return self.dir_parser.parse_directory_entries(raw)
 
     def walk(self) -> List[FileRecord]:
-        """Traverse the directory tree and return collected file records."""
+
         root_cluster = self.parser.boot_sector.root_dir_cluster
         records: List[FileRecord] = []
         self._walk_dir(cluster=root_cluster, prefix="/", out=records)
@@ -179,7 +179,7 @@ class FAT32Analyzer:
         }
 
     def analyze(self) -> Dict:
-        """Return a comprehensive fragmentation report."""
+
         if not self.parser.boot_sector:
             self.parser.parse_boot_sector()
         records = self.walk()
@@ -194,7 +194,7 @@ class FAT32Analyzer:
 
 
 def print_summary(report: Dict) -> None:
-    """Pretty-print a human readable summary suitable for CLI use."""
+
     stats = report["stats"]
     print(f"Cluster size: {stats['cluster_size_bytes']} bytes")
     print(

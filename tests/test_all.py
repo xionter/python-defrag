@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-"""Convenience checks that exercise the parser, analyzer, and engine."""
-
 import argparse
 import sys
 from pathlib import Path
