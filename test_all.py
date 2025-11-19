@@ -17,84 +17,55 @@ def get_absolute_image_path(relative_path):
             return None
     return abs_path
 
-
 def run_parser_test(image_path):
     print("=" * 60)
     print("TESTING PARSER MODULE")
     print("=" * 60)
 
-    parser_dir = os.path.join(os.path.dirname(__file__), 'parser')
-    test_script = os.path.join(parser_dir, 'test_parser.py')
+    test_script = os.path.join(os.path.dirname(__file__), 'tests', 'test_parser.py')
 
-    if os.path.exists(test_script):
-        print("Running parser test...")
-        try:
-            abs_image_path = get_absolute_image_path(image_path)
-            if not abs_image_path:
-                print("Test image not found")
-                return False
-
-            temp_test = os.path.join(parser_dir, 'temp_test.py')
-            with open(test_script, 'r') as f:
-                content = f.read()
-
-            modified_content = content.replace(
-                "image_path = image_path_windows if os.name == 'nt' else image_path_linux",
-                f'image_path = r"{abs_image_path}"'
-            )
-
-            with open(temp_test, 'w') as f:
-                f.write(modified_content)
-
-            original_dir = os.getcwd()
-            os.chdir(parser_dir)
-            subprocess.run([sys.executable, 'temp_test.py'], check=True)
-            os.chdir(original_dir)
-
-            if os.path.exists(temp_test):
-                os.remove(temp_test)
-
-            print("Parser test completed successfully\n")
-            return True
-        except subprocess.CalledProcessError as e:
-            print(f"Parser test failed: {e}\n")
-            if os.path.exists(temp_test):
-                os.remove(temp_test)
-            return False
-    else:
+    if not os.path.exists(test_script):
         print("Parser test script not found\n")
         return False
 
+    try:
+        abs_image_path = get_absolute_image_path(image_path)
+        if not abs_image_path:
+            print("Test image not found")
+            return False
+
+        subprocess.run([sys.executable, test_script, abs_image_path], check=True)
+        print("Parser test completed successfully\n")
+        return True
+
+    except subprocess.CalledProcessError as e:
+        print(f"Parser test failed: {e}\n")
+        return False
 
 def run_analysis_test(image_path):
     print("=" * 60)
     print("TESTING ANALYSIS MODULE")
     print("=" * 60)
 
-    analysis_dir = os.path.join(os.path.dirname(__file__), 'analysis')
-    test_script = os.path.join(analysis_dir, 'test_analyser.py')
+    test_script = os.path.join(os.path.dirname(__file__), 'tests', 'test_analysis.py')
 
-    if os.path.exists(test_script):
-        print("Running analysis test...")
-        try:
-            abs_image_path = get_absolute_image_path(image_path)
-            if not abs_image_path:
-                print("Test image not found")
-                return False
-
-            original_dir = os.getcwd()
-            os.chdir(analysis_dir)
-            subprocess.run([sys.executable, 'test_analyser.py', abs_image_path, '--top', '5'], check=True)
-            os.chdir(original_dir)
-            print("Analysis test completed successfully\n")
-            return True
-        except subprocess.CalledProcessError as e:
-            print(f"Analysis test failed: {e}\n")
-            return False
-    else:
+    if not os.path.exists(test_script):
         print("Analysis test script not found\n")
         return False
 
+    try:
+        abs_image_path = get_absolute_image_path(image_path)
+        if not abs_image_path:
+            print("Test image not found")
+            return False
+
+        subprocess.run([sys.executable, test_script, abs_image_path], check=True)
+        print("Analysis test completed successfully\n")
+        return True
+
+    except subprocess.CalledProcessError as e:
+        print(f"Analysis test failed: {e}\n")
+        return False
 
 def run_integration_test(image_path):
     print("=" * 60)
