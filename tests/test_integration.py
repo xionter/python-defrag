@@ -1,25 +1,22 @@
-import sys
 import os
 import unittest
+from pathlib import Path
 
-# Add project root to path
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(os.path.join(project_root, 'parser'))
-sys.path.append(os.path.join(project_root, 'analysis'))
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-from fat32_parser import FAT32Parser
-from analyser import FAT32Analyzer
+from python_defrag.parser.fat32_parser import FAT32Parser
+from python_defrag.analysis.analyser import FAT32Analyzer
 
 class TestIntegration(unittest.TestCase):
     
     def setUp(self):
-        self.image_path = os.path.join(project_root, "images", "FAT_32_fragmented")
+        self.image_path = PROJECT_ROOT / "images" / "FAT_32_fragmented"
         if not os.path.exists(self.image_path):
             self.skipTest("Test image not found")
     
     def test_parser_to_analyzer_flow(self):
         """Test that parser and analyzer work together"""
-        with FAT32Parser(self.image_path) as parser:
+        with FAT32Parser(str(self.image_path)) as parser:
             boot_sector = parser.parse_boot_sector()
             self.assertIsNotNone(boot_sector)
             
@@ -39,7 +36,7 @@ class TestIntegration(unittest.TestCase):
     
     def test_directory_traversal(self):
         """Test that we can traverse directories"""
-        with FAT32Parser(self.image_path) as parser:
+        with FAT32Parser(str(self.image_path)) as parser:
             parser.parse_boot_sector()
             analyzer = FAT32Analyzer(parser)
             records = analyzer.walk()

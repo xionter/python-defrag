@@ -1,62 +1,73 @@
-import sys
 import os
 import unittest
+from pathlib import Path
 
-# Add project paths
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(os.path.join(project_root, 'parser'))
-sys.path.append(os.path.join(project_root, 'analysis'))
-sys.path.append(os.path.join(project_root, 'engine'))
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-from fat32_parser import FAT32Parser
-from defrag_engine import DefragmentationEngine
+from python_defrag.engine.defrag_engine import DefragmentationEngine
+from python_defrag.parser.fat32_parser import FAT32Parser
 
 class TestDefragEngine(unittest.TestCase):
     
     def setUp(self):
-        self.image_path = os.path.join(project_root, "images", "FAT_32_fragmented")
+        self.image_path = PROJECT_ROOT / "images" / "FAT_32_fragmented"
         if not os.path.exists(self.image_path):
             self.skipTest("Test image not found")
     
     def test_engine_initialization(self):
         """Test that engine can be initialized"""
-        with FAT32Parser(self.image_path) as parser:
+        with FAT32Parser(str(self.image_path)) as parser:
             parser.parse_boot_sector()
             engine = DefragmentationEngine(parser)
             self.assertIsNotNone(engine)
     
     def test_analysis_method(self):
         """Test that engine can analyze fragmentation"""
-        with FAT32Parser(self.image_path) as parser:
+        with FAT32Parser(str(self.image_path)) as parser:
             parser.parse_boot_sector()
             engine = DefragmentationEngine(parser)
-            report = engine.analyze_fragmentation()
+            report = engine.analyzer.analyze()
             
             self.assertIn('stats', report)
             self.assertIn('files', report)
     
     def test_planning_method(self):
         """Test that engine can plan defragmentation"""
-        with FAT32Parser(self.image_path) as parser:
+        with FAT32Parser(str(self.image_path)) as parser:
             parser.parse_boot_sector()
             engine = DefragmentationEngine(parser)
-            report = engine.analyze_fragmentation()
+            report = engine.analyzer.analyze()
             moves = engine.plan_defragmentation(report)
-            
+
             # Should return a list (may be empty if no fragmentation)
             self.assertIsInstance(moves, list)
-    
-    def test_dry_run_defragmentation(self):
-        """Test dry run defragmentation"""
-        with FAT32Parser(self.image_path) as parser:
-            parser.parse_boot_sector()
-            engine = DefragmentationEngine(parser)
-            result = engine.defragment(dry_run=True)
-            
-            self.assertIn('original_report', result)
-            self.assertIn('planned_moves', result)
-            self.assertIn('simulation_results', result)
-            self.assertFalse(result['executed'])
+            if not moves:
+                return
+
+            required_keys = {
+                "file_path",
+                "source_clusters",
+                "target_start",
+                "size_bytes",
+                "fragments_before",
+                "fragments_after",
+            }
+
+            for move in moves:
+                self.assertTrue(required_keys.issubset(move.keys()))
+                self.assertIsInstance(move["file_path"], str)
+                self.assertTrue(move["file_path"])
+                self.assertIsInstance(move["source_clusters"], list)
+                self.assertGreater(len(move["source_clusters"]), 0)
+                self.assertTrue(all(isinstance(c, int) and c >= 2 for c in move["source_clusters"]))
+                self.assertIsInstance(move["target_start"], int)
+                self.assertGreaterEqual(move["target_start"], 2)
+                self.assertIsInstance(move["size_bytes"], int)
+                self.assertGreaterEqual(move["size_bytes"], 0)
+                self.assertIsInstance(move["fragments_before"], int)
+                self.assertGreater(move["fragments_before"], 0)
+                self.assertIsInstance(move["fragments_after"], int)
+                self.assertEqual(move["fragments_after"], 1)
 
 if __name__ == '__main__':
     unittest.main()

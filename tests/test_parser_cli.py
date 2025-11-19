@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
-import sys
 import os
-sys.path.append(os.path.dirname(__file__))
+from pathlib import Path
 
-from fat32_parser import FAT32Parser
-from directory_entry import DirectoryParser
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-def main():
-    image_path_linux = "../images/FAT_32_32MB"
-    image_path_windows = "S:\second year\python-defrag\images\FAT_32_32MB"
-    image_path = image_path_windows if os.name == 'nt' else image_path_linux
+from python_defrag.parser.directory_entry import DirectoryParser
+from python_defrag.parser.fat32_parser import FAT32Parser
 
+
+def main() -> None:
+    default_image = PROJECT_ROOT / "images" / "FAT_32_32MB"
+    image_path = os.environ.get("PYTHON_DEFRAG_IMAGE", str(default_image))
 
     try:
         with FAT32Parser(image_path) as fat_parser:
@@ -20,18 +20,22 @@ def main():
             print(f"  Bytes per sector: {boot_sector.bytes_per_sector}")
             print(f"  Sectors per cluster: {boot_sector.sectors_per_cluster}")
             print(f"  Root directory cluster: {boot_sector.root_dir_cluster}")
-            
+
             dir_parser = DirectoryParser(fat_parser)
             entries = dir_parser.parse_root_directory()
-            
+
             print("\nRoot Directory Entries:")
             for entry in entries:
                 type_str = "DIR" if entry.is_directory else "FILE"
                 size_str = f"{entry.file_size:8d}" if not entry.is_directory else "       -"
-                print(f"  {entry.full_name:12s} {type_str} Cluster: {entry.first_cluster:6d} Size: {size_str}")
-                
-    except Exception as e:
-        print(f"Error: {e}")
+                print(
+                    f"  {entry.full_name:12s} {type_str} "
+                    f"Cluster: {entry.first_cluster:6d} Size: {size_str}"
+                )
+
+    except Exception as exc:  # pragma: no cover - helper script
+        print(f"Error: {exc}")
+
 
 if __name__ == "__main__":
     main()
