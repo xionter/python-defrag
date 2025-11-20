@@ -1,7 +1,7 @@
 from dataclasses import dataclass, asdict
 
-from fat32_parser import FAT32Parser
-from directory_entry import DirectoryParser
+from .fat32_parser import FAT32Parser
+from .directory_entry import DirectoryParser
 
 from dataclasses import dataclass
 from typing import List, Tuple, Dict, Optional

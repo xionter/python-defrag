@@ -3,8 +3,8 @@ import os
 import shutil
 import struct
 from datetime import datetime
-from fat32_parser import FAT32Parser
-from analyser import FAT32Analyzer
+from .fat32_parser import FAT32Parser
+from .analyser import FAT32Analyzer
 
 
 class DefragmentationEngine:

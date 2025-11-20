@@ -4,8 +4,8 @@ import sys
 import os
 
 
-from fat32_parser import FAT32Parser
-from defrag_engine import DefragmentationEngine
+from .fat32_parser import FAT32Parser
+from .defrag_engine import DefragmentationEngine
 
 def main():
     parser = argparse.ArgumentParser(description='FAT32 Defragmentation Engine')
