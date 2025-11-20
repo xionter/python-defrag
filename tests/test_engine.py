@@ -2,14 +2,11 @@ import sys
 import os
 import unittest
 
-# Add project paths
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(os.path.join(project_root, 'parser'))
-sys.path.append(os.path.join(project_root, 'analysis'))
-sys.path.append(os.path.join(project_root, 'engine'))
 
-from fat32_parser import FAT32Parser
-from defrag_engine import DefragmentationEngine
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+
+from src import DefragmentationEngine, FAT32Parser
 
 class TestDefragEngine(unittest.TestCase):
     

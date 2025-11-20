@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 import sys
-import os
 
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.insert(0, ROOT)
-
-from parser.fat32_parser import FAT32Parser
-from parser.directory_entry import DirectoryParser
+from src import FAT32Parser, DirectoryParser
 
 
 def main(image_path):

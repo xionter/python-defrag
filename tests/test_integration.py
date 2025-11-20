@@ -2,13 +2,9 @@ import sys
 import os
 import unittest
 
-# Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(os.path.join(project_root, 'parser'))
-sys.path.append(os.path.join(project_root, 'analysis'))
 
-from fat32_parser import FAT32Parser
-from analyser import FAT32Analyzer
+from src import FAT32Analyzer, FAT32Parser
 
 class TestIntegration(unittest.TestCase):
     

@@ -1,12 +1,4 @@
-﻿import sys
-import os
-
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.insert(0, ROOT)
-
-from analysis.analyser import FAT32Analyzer, print_summary
-from parser.fat32_parser import FAT32Parser
-from parser.directory_entry import DirectoryParser
+﻿from src import FAT32Analyzer, print_summary, FAT32Parser
 
 
 def main_cli(image_path: str, top_n: int = 10) -> None:
