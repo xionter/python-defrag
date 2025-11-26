@@ -137,14 +137,12 @@ def run_engine_test(image_path):
             parser.parse_boot_sector()
             engine = DefragmentationEngine(parser)
 
-            # Анализ напрямую через analyzer,
             report = engine.analyzer.analyze()
             print("Analysis working")
 
             moves = engine.plan_defragmentation(report)
             print(f"Planning working - found {len(moves)} moves to make")
 
-            # defragment без dry_run (новый интерфейс)
             result = engine.defragment()
             print("Defragmentation call working")
 

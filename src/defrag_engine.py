@@ -177,7 +177,7 @@ class DefragmentationEngine:
         try:
             with FAT32Parser(output_image_path, writable=True) as output_parser:
                 output_parser.parse_boot_sector()
-                output_parser.read_cluster(2)  # простая проверка чтения
+                output_parser.read_cluster(2)
 
                 for move in moves:
                     if self.move_file_clusters(output_parser, move):

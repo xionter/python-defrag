@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import argparse
 import sys
 import os
@@ -21,8 +20,7 @@ def main():
                        help='Skip verification after defragmentation')
     
     args = parser.parse_args()
-    
-    # Validate image exists
+
     if not os.path.exists(args.image):
         print(f"Error: Image file not found: {args.image}")
         return 1
@@ -33,20 +31,17 @@ def main():
             engine = DefragmentationEngine(fat_parser)
             
             if args.analyze_only:
-                # Just analyze
                 report = engine.analyze_fragmentation()
                 from analyser import print_summary
                 print_summary(report)
             else:
-                # Run defragmentation (dry run by default)
                 dry_run = not args.execute
                 result = engine.defragment(
                     output_path=args.output,
                     dry_run=dry_run,
                     verify=not args.no_verify
                 )
-                
-                # Print results
+
                 print("\n" + "=" * 60)
                 print("DEFRAGMENTATION RESULTS")
                 print("=" * 60)

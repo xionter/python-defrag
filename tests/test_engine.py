@@ -16,14 +16,12 @@ class TestDefragEngine(unittest.TestCase):
             self.skipTest("Test image not found")
     
     def test_engine_initialization(self):
-        """Test that engine can be initialized"""
         with FAT32Parser(self.image_path) as parser:
             parser.parse_boot_sector()
             engine = DefragmentationEngine(parser)
             self.assertIsNotNone(engine)
     
     def test_analysis_method(self):
-        """Test that engine can analyze fragmentation"""
         with FAT32Parser(self.image_path) as parser:
             parser.parse_boot_sector()
             engine = DefragmentationEngine(parser)
@@ -33,18 +31,15 @@ class TestDefragEngine(unittest.TestCase):
             self.assertIn('files', report)
     
     def test_planning_method(self):
-        """Test that engine can plan defragmentation"""
         with FAT32Parser(self.image_path) as parser:
             parser.parse_boot_sector()
             engine = DefragmentationEngine(parser)
             report = engine.analyze_fragmentation()
             moves = engine.plan_defragmentation(report)
-            
-            # Should return a list (may be empty if no fragmentation)
+
             self.assertIsInstance(moves, list)
     
     def test_dry_run_defragmentation(self):
-        """Test dry run defragmentation"""
         with FAT32Parser(self.image_path) as parser:
             parser.parse_boot_sector()
             engine = DefragmentationEngine(parser)
