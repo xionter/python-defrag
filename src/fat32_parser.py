@@ -43,7 +43,6 @@ class FAT32Parser:
         self.close()
 
     def sync(self):
-        """Sync changes to disk"""
         if self.file_handle:
             self.file_handle.flush()
             os.fsync(self.file_handle.fileno())        
@@ -115,7 +114,6 @@ class FAT32Parser:
         return self.file_handle.read(cluster_size)
 
     def write_cluster(self, cluster: int, data: bytes) -> None:
-        """Write data to a cluster"""
         if not self.writable:
             raise RuntimeError("Parser not opened in writable mode")
             
@@ -161,19 +159,16 @@ class FAT32Parser:
         return chain
 
     def write_fat_entry(self, cluster: int, value: int) -> None:
-        """Write a FAT entry"""
         if not self.writable:
             raise RuntimeError("Parser not opened in writable mode")
             
         if not self.boot_sector:
             raise RuntimeError("Boot sector not parsed")
             
-        # Write to all FAT copies
         for fat_num in range(self.boot_sector.num_fats):
             fat_offset = self.get_fat_offset(fat_num)
             entry_offset = cluster * 4
             
             self.file_handle.seek(fat_offset + entry_offset)
-            # Mask to 28 bits for FAT32
             masked_value = value & 0x0FFFFFFF
             self.file_handle.write(struct.pack('<I', masked_value))
