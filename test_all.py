@@ -143,7 +143,7 @@ def run_engine_test(image_path):
             moves = engine.plan_defragmentation(report)
             print(f"Planning working - found {len(moves)} moves to make")
 
-            result = engine.defragment()
+            result = engine.defragment(verify=True)
             print("Defragmentation call working")
 
             print("Engine test completed successfully\n")
